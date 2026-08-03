@@ -1,0 +1,243 @@
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+// }
+// model users{
+//   id        String   @id @default(uuid()) @db.Uuid
+//   fullName  String   @db.VarChar(255)
+//   email     String   @unique @db.VarChar(255)
+//   password  String   @db.VarChar(255)
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   ownedWorkspaces    workspaces[]
+//   workspaceMembers   workspace_members[]
+//   projectMembers     project_members[]
+//   assignedTasks      tasks[]
+//   createdProjects projects[] @relation("ProjectCreator")
+// }
+
+// model workspaces{
+//   id String @id @default(uuid()) @db.Uuid
+//   name String @db.VarChar(255)
+//   description String @db.Text
+//   ownerId String @db.Uuid 
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   user users @relation(fields: [ownerId], references: [id])
+//   workspaceMembers workspace_members[]
+//   projects projects[]
+// }
+
+// model workspace_members{
+//   id String @id @default(uuid()) @db.Uuid
+//   workspaceId String @db.Uuid
+//   userId String @db.Uuid
+//   joinedAt DateTime @default(now())
+//   workspace workspaces @relation(fields: [workspaceId], references: [id])
+//   user users @relation(fields: [userId], references: [id])
+// }
+
+// model projects{
+//   id String @id @default(uuid()) @db.Uuid
+//   workspaceId String @db.Uuid
+//   name String @db.VarChar(255)
+//   description String @db.Text
+//   deadline DateTime 
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   createdBy String @db.Uuid
+//   creator users @relation("ProjectCreator", fields: [createdBy], references: [id])
+//   workspace workspaces @relation(fields: [workspaceId], references: [id])
+//   projectMembers project_members[]
+//   boards boards[]
+// }
+// model project_members{
+//   id String @id @default(uuid()) @db.Uuid
+//   projectId String @db.Uuid
+//   userId String @db.Uuid
+//   addedBy String @db.Uuid
+//   joinedAt DateTime @default(now())
+//   project projects @relation(fields: [projectId], references: [id])
+//   user users @relation(fields: [userId], references: [id])
+// }
+
+// model boards{
+//   id String @id @default(uuid()) @db.Uuid
+//   projectId String @db.Uuid
+//   name String @db.VarChar(255)
+//   description String @db.Text
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   project projects @relation(fields: [projectId], references: [id])
+//   tasks tasks[]
+// }
+// model tasks{
+//   id String @id @default(uuid()) @db.Uuid
+//   boardId String @db.Uuid
+//   title String @db.VarChar(255)
+//   description String @db.Text
+//   assignedTo String @db.Uuid
+//   status TaskStatus @default(todo)
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   createdBy String @db.Uuid
+//   board boards @relation(fields: [boardId], references: [id])
+//   assignedUser users @relation(fields: [assignedTo], references: [id])
+// }
+// enum TaskStatus {
+//   todo
+//   in_progress
+//   done
+// }
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model users {
+  id    String   @id @default(uuid()) @db.Uuid
+  fullName  String   @db.VarChar(255)
+  email  String   @unique @db.VarChar(255)
+  password String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  // Workspace ownership
+  ownedWorkspaces workspaces[] @relation("WorkspaceOwner")
+  // Memberships
+  workspaceMembers workspacemembers[]
+  projectMembers   projectmembers[]
+  // Project creation
+  createdProjects projects[] @relation("ProjectCreator")
+  // Board creation
+  createdBoards boards[] @relation("BoardCreator")
+  // Task assignment and creation
+  assignedTasks tasks[] @relation("TaskAssignee")
+  createdTasks  tasks[] @relation("TaskCreator")
+  // Added project members
+  addedProjectMembers projectmembers[] @relation("ProjectMemberAdder")
+  @@index([deletedAt])
+}
+
+model workspaces {
+  id   String   @id @default(uuid()) @db.Uuid
+  name  String   @db.VarChar(255)
+  description String?  @db.Text
+  ownerId   String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  owner users @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  workspaceMembers workspacemembers[]
+  projects  projects[]
+  @@index([ownerId])
+  @@index([deletedAt])
+}
+
+enum role {
+  member
+  owner
+}
+model workspacemembers {
+  id  String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  userId   String   @db.Uuid
+  joinedAt DateTime @default(now())
+  role role @default(member)
+  workspace workspaces @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      users      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([workspaceId, userId])
+  @@index([userId])
+}
+
+model projects {
+  id   String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  name   String   @db.VarChar(255)
+  description String?  @db.Text
+  deadline  DateTime?
+  createdBy String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  workspace workspaces @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creator   users      @relation("ProjectCreator", fields: [createdBy], references: [id])
+  projectMembers projectmembers[]
+  boards         boards[]
+  @@index([workspaceId])
+  @@index([createdBy])
+  @@index([deletedAt])
+}
+
+model projectmembers {
+  id  String   @id @default(uuid()) @db.Uuid
+  projectId String   @db.Uuid 
+  userId  String   @db.Uuid
+  addedBy  String   @db.Uuid
+  joinedAt DateTime @default(now())
+  role role @default(member)
+  project     projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addedByUser users    @relation("ProjectMemberAdder", fields: [addedBy], references: [id])
+  @@unique([projectId, userId])
+  @@index([userId])
+  @@index([addedBy])
+}
+
+model boards {
+  id    String   @id @default(uuid()) @db.Uuid
+  projectId   String   @db.Uuid
+  name  String   @db.VarChar(255)
+  description String?  @db.Text
+  createdBy String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  project projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  creator users    @relation("BoardCreator", fields: [createdBy], references: [id])
+  tasks tasks[]
+  @@unique([projectId, name])
+  @@index([projectId])
+  @@index([createdBy])
+  @@index([deletedAt])
+}
+
+model tasks {
+  id  String   @id @default(uuid()) @db.Uuid
+  boardId String   @db.Uuid
+  title   String   @db.VarChar(255)
+  description String?    @db.Text
+  assignedTo  String?    @db.Uuid
+  createdBy  String     @db.Uuid
+  status  TaskStatus @default(todo)
+  // Order within a Kanban column
+  position  Int  @default(0)
+
+  deadline DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  board    boards @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  assignee users? @relation("TaskAssignee", fields: [assignedTo], references: [id])
+  creator  users  @relation("TaskCreator", fields: [createdBy], references: [id])
+
+  @@index([boardId])
+  @@index([assignedTo])
+  @@index([createdBy])
+  @@index([status])
+  @@index([boardId, status])
+  @@index([boardId, status, position])
+  @@index([deletedAt])
+}
+
+enum TaskStatus {
+  todo
+  inprogress
+  done
+}
