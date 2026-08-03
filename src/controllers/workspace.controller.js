@@ -2,7 +2,6 @@ const workspaceService = require('../service/workspace.service');
 const createWorkspace = async (req, res) => {
   try {
     console.log(req.user);
-console.log(req.user?.id);
     const result = await workspaceService.createWorkspace(req.body, req.user.id);   
     res.status(201).json({
       success: true,
@@ -36,7 +35,7 @@ console.log(req.user?.id);
   const getWorkspaceById = async (req, res) => {
     try {
       console.log('Controller:', req.params.id, req.user.id);
-      const result = await workspaceService.getWorkspaceById(req.params.id, req.user.id);
+      const result = await workspaceService.getWorkspaceById(req.params.id, req .user.id);
         if (!result) {
             return res.status(404).json({
                 success: false,

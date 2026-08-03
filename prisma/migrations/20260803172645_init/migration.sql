@@ -1,14 +1,8 @@
-/*
-  Warnings:
-
-  - You are about to drop the `user` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
-CREATE TYPE "TaskStatus" AS ENUM ('todo', 'in_progress', 'done');
+CREATE TYPE "role" AS ENUM ('member', 'owner');
 
--- DropTable
-DROP TABLE "user";
+-- CreateEnum
+CREATE TYPE "TaskStatus" AS ENUM ('todo', 'inprogress', 'done');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -37,13 +31,14 @@ CREATE TABLE "workspaces" (
 );
 
 -- CreateTable
-CREATE TABLE "workspace_members" (
+CREATE TABLE "workspacemembers" (
     "id" UUID NOT NULL,
     "workspaceId" UUID NOT NULL,
     "userId" UUID NOT NULL,
     "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "role" "role" NOT NULL DEFAULT 'member',
 
-    CONSTRAINT "workspace_members_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "workspacemembers_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -62,14 +57,15 @@ CREATE TABLE "projects" (
 );
 
 -- CreateTable
-CREATE TABLE "project_members" (
+CREATE TABLE "projectmembers" (
     "id" UUID NOT NULL,
     "projectId" UUID NOT NULL,
     "userId" UUID NOT NULL,
     "addedBy" UUID NOT NULL,
     "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "role" "role" NOT NULL DEFAULT 'member',
 
-    CONSTRAINT "project_members_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "projectmembers_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -117,10 +113,10 @@ CREATE INDEX "workspaces_ownerId_idx" ON "workspaces"("ownerId");
 CREATE INDEX "workspaces_deletedAt_idx" ON "workspaces"("deletedAt");
 
 -- CreateIndex
-CREATE INDEX "workspace_members_userId_idx" ON "workspace_members"("userId");
+CREATE INDEX "workspacemembers_userId_idx" ON "workspacemembers"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "workspace_members_workspaceId_userId_key" ON "workspace_members"("workspaceId", "userId");
+CREATE UNIQUE INDEX "workspacemembers_workspaceId_userId_key" ON "workspacemembers"("workspaceId", "userId");
 
 -- CreateIndex
 CREATE INDEX "projects_workspaceId_idx" ON "projects"("workspaceId");
@@ -132,13 +128,13 @@ CREATE INDEX "projects_createdBy_idx" ON "projects"("createdBy");
 CREATE INDEX "projects_deletedAt_idx" ON "projects"("deletedAt");
 
 -- CreateIndex
-CREATE INDEX "project_members_userId_idx" ON "project_members"("userId");
+CREATE INDEX "projectmembers_userId_idx" ON "projectmembers"("userId");
 
 -- CreateIndex
-CREATE INDEX "project_members_addedBy_idx" ON "project_members"("addedBy");
+CREATE INDEX "projectmembers_addedBy_idx" ON "projectmembers"("addedBy");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "project_members_projectId_userId_key" ON "project_members"("projectId", "userId");
+CREATE UNIQUE INDEX "projectmembers_projectId_userId_key" ON "projectmembers"("projectId", "userId");
 
 -- CreateIndex
 CREATE INDEX "boards_projectId_idx" ON "boards"("projectId");
@@ -148,6 +144,9 @@ CREATE INDEX "boards_createdBy_idx" ON "boards"("createdBy");
 
 -- CreateIndex
 CREATE INDEX "boards_deletedAt_idx" ON "boards"("deletedAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "boards_projectId_name_key" ON "boards"("projectId", "name");
 
 -- CreateIndex
 CREATE INDEX "tasks_boardId_idx" ON "tasks"("boardId");
@@ -174,10 +173,10 @@ CREATE INDEX "tasks_deletedAt_idx" ON "tasks"("deletedAt");
 ALTER TABLE "workspaces" ADD CONSTRAINT "workspaces_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "workspace_members" ADD CONSTRAINT "workspace_members_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "workspaces"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "workspacemembers" ADD CONSTRAINT "workspacemembers_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "workspaces"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "workspace_members" ADD CONSTRAINT "workspace_members_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "workspacemembers" ADD CONSTRAINT "workspacemembers_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "projects" ADD CONSTRAINT "projects_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "workspaces"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -186,13 +185,13 @@ ALTER TABLE "projects" ADD CONSTRAINT "projects_workspaceId_fkey" FOREIGN KEY ("
 ALTER TABLE "projects" ADD CONSTRAINT "projects_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "project_members" ADD CONSTRAINT "project_members_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "projectmembers" ADD CONSTRAINT "projectmembers_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "project_members" ADD CONSTRAINT "project_members_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "projectmembers" ADD CONSTRAINT "projectmembers_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "project_members" ADD CONSTRAINT "project_members_addedBy_fkey" FOREIGN KEY ("addedBy") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "projectmembers" ADD CONSTRAINT "projectmembers_addedBy_fkey" FOREIGN KEY ("addedBy") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "boards" ADD CONSTRAINT "boards_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;

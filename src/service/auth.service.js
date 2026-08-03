@@ -1,21 +1,8 @@
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const env = require('../config/env');
 const userRepository = require('../repository/user.repository');
+const { generateTokens } = require('../utils/tokengenerator');
 
-
-function generateTokens(user) {
-const payload = {userId: user.id};
-  const accessToken = jwt.sign(payload, env.jwtAccessSecret, {
-    expiresIn: env.jwtAccessExpiresIn,
-  });
-
-  const refreshToken = jwt.sign(payload, env.jwtRefreshSecret, {
-    expiresIn: env.jwtRefreshExpiresIn,
-  });
-
-  return { accessToken, refreshToken };
-}
 
 async function register({ fullName, email, password }) {
   const existingUser = await userRepository.findByEmail(email);

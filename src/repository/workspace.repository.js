@@ -1,9 +1,17 @@
 const prisma = require("../config/prisma");
 
 async function createWorkspace(data) {
-  return prisma.workspaces.create({
+   const workspace = await prisma.workspaces.create({
     data,
   });
+  await prisma.workspacemembers.create({
+    data: {
+      workspaceId: workspace.id,
+      userId: data.ownerId,
+       role: "owner",
+    },
+  });
+  return workspace;
 }
 async function getAllWorkspaces(userId) {
   return prisma.workspaces.findMany({
@@ -24,26 +32,48 @@ async function getWorkspaceById(id, userId) {
 }
 
 async function updateWorkspace(id, data, userId) {
-    return prisma.workspaces.updateMany({
-        where: {
-            id,
-            ownerId: userId,
-            deletedAt: null,
-        },
-        data,
-    });
+  const workspace = await prisma.workspaces.findFirst({
+  where: {
+    id,
+    ownerId: userId,
+    deletedAt: null,
+  },
+});
+
+if (!workspace) {
+  throw new Error('Workspace not found');
+}
+
+return prisma.workspaces.update({
+  where: { id },
+  data,
+});
 }
 async function deleteWorkspace(id, userId) {
-    return prisma.workspaces.updateMany({
-        where: {
-            id,
-            ownerId: userId,
-            deletedAt: null,
-        },
-        data: {
-            deletedAt: new Date(),
-        },
-    });
+const workspace = await prisma.workspaces.findFirst({
+  where: {
+    id,
+    ownerId: userId,
+    deletedAt: null,
+  },
+});
+if (!workspace) {
+  throw new Error('Workspace not found');
+}
+ await prisma.workspacemembers.updateMany({
+  where: {
+    workspaceId: id,
+    deletedAt: null,
+  },
+  data:{
+    deletedAt: new Date(),
+  }
+});
+return prisma.workspaces.update({
+  where: { id },
+  data: {deletedAt: new Date()},
+});
+       
 }
 
 module.exports = {createWorkspace,getAllWorkspaces,getWorkspaceById,updateWorkspace,deleteWorkspace,};
