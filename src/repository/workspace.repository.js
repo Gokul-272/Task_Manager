@@ -60,15 +60,6 @@ const workspace = await prisma.workspaces.findFirst({
 if (!workspace) {
   throw new Error('Workspace not found');
 }
- await prisma.workspacemembers.updateMany({
-  where: {
-    workspaceId: id,
-    deletedAt: null,
-  },
-  data:{
-    deletedAt: new Date(),
-  }
-});
 return prisma.workspaces.update({
   where: { id },
   data: {deletedAt: new Date()},

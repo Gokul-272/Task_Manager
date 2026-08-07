@@ -1,4 +1,4 @@
-const router = require('express').Router();
+const workspacerouter = require('express').Router();
 const workspaceController = require('../controllers/workspace.controller');
 const { authMiddleware } = require('../middleware/auth.middleware');
 const validate = require('../middleware/validate.middleware');
@@ -6,9 +6,9 @@ const { createWorkspaceSchema,updateWorkspaceSchema,workspaceIdSchema } = requir
 
 console.log('authMiddleware:', typeof authMiddleware);
 
-router.post('/',authMiddleware,validate(createWorkspaceSchema), workspaceController.createWorkspace);
-router.get('/', authMiddleware, workspaceController.getAllWorkspaces);
-router.get('/:id',authMiddleware,validate(workspaceIdSchema), workspaceController.getWorkspaceById);
-router.patch('/:id',authMiddleware,validate(workspaceIdSchema),validate(updateWorkspaceSchema), workspaceController.updateWorkspace);
-router.delete('/:id',authMiddleware,validate(workspaceIdSchema),workspaceController.deleteWorkspace);
-module.exports = router;
+workspacerouter.post('/',authMiddleware,validate(createWorkspaceSchema), workspaceController.createWorkspace);
+workspacerouter.get('/', authMiddleware, workspaceController.getAllWorkspaces);
+workspacerouter.get('/:id',authMiddleware,validate(workspaceIdSchema), workspaceController.getWorkspaceById);
+workspacerouter.patch('/:id',authMiddleware,validate(workspaceIdSchema),validate(updateWorkspaceSchema), workspaceController.updateWorkspace);
+workspacerouter.delete('/:id',authMiddleware,validate(workspaceIdSchema),workspaceController.deleteWorkspace);
+module.exports = workspacerouter;
