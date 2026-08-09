@@ -8,4 +8,4 @@ async function updateUser(userId, data) {
 module.exports = {
   getCurrentUser,
   updateUser
-};
+}; 

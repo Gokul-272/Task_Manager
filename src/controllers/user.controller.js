@@ -1,6 +1,6 @@
 const userService = require('../service/user.service');
 
-async function getCurrentUser(req, res) {
+const getCurrentUser = async (req, res, next) => {
   try {
     const user = await userService.getCurrentUser(req.user.id);
     return res.status(200).json({
@@ -8,27 +8,21 @@ async function getCurrentUser(req, res) {
       data: user,
     });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
+    next(error);
+  }
+}
+const updateUser = async (req, res, next) => {
+  try {
+    const updatedUser = await userService.updateUser(req.user.id, req.body);
+    return res.status(200).json({
+      success: true,
+      message: 'User Data updated successfully',
+      data: updatedUser,
     });
   }
-} 
-  async function updateUser(req, res) {
-    try {
-      const updatedUser = await userService.updateUser(req.user.id, req.body);
-      return res.status(200).json({
-        success: true,
-        message: 'User updated successfully',
-        data: updatedUser,
-      });
-    }
-    catch (error) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
+  catch (error) {
+    next(error);
+  }
 }
 
 module.exports = {

@@ -3,7 +3,7 @@ const { cookieseter,generateAccessToken,clearAuthCookies } = require('../utils/t
 const env = require('../config/env');
 const jwt = require('jsonwebtoken');
 
-async function register(req, res) {
+const register =async(req, res,next) => {
   try {
     const result = await authService.register(req.body);
     cookieseter(res, result);
@@ -13,14 +13,10 @@ async function register(req, res) {
       data: result.user
     });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 }
-async function login(req,res)
-{
+const login =async(req,res,next) => {
   try{
     const result=await authService.login(req.body);
     cookieseter(res, result);
@@ -31,13 +27,10 @@ async function login(req,res)
     }); 
   }catch(error)
   {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+   next(error);
   }
 }
- async function refreshToken(req,res)
+async function refreshToken(req,res,next)
  {
      const refreshToken=req.cookies.refreshToken;
      if(!refreshToken)
@@ -50,7 +43,7 @@ async function login(req,res)
     try{
       const payload = jwt.verify(refreshToken, env.jwtRefreshSecret);
       const newAccessToken = generateAccessToken({ id: payload.userId });
-       res.cookie('accessToken', newAccessToken, {
+      res.cookie('accessToken', newAccessToken, {
         httpOnly: true,
         secure: false,
         sameSite: 'lax',
@@ -61,19 +54,21 @@ async function login(req,res)
         data:{ accessToken: newAccessToken }
       });
     }catch(error)
-    {
-      return res.status(401).json({
-        success:false,
-        message:'Invalid refresh token'
-      });
+    {next(error);
     }
  }
-function logout(req, res) {
-  clearAuthCookies(res);
-  return res.status(200).json({
+function logout(req, res,next) {
+  try{
+    clearAuthCookies(res);
+    return res.status(200).json({
     success: true,
     message: "User logged out successfully",
   });
+  }
+  catch(error)
+  {
+     next(error);
+  }
 }
 module.exports = {
   register,

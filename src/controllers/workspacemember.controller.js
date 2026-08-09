@@ -1,35 +1,35 @@
 const workspaceMemberService=require('../service/workspacemember.service');
-const getWorkspaceMembers = async (req, res) => {
+const getWorkspaceMembers = async (req, res,next) => {
     try{
         const { workspaceId } = req.params;
         const userId = req.user.id;
         const result = await workspaceMemberService.getWorkspaceMembers(workspaceId, userId);
         res.status(200).json({ success: true, data: result });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 }
-const removeWorkspaceMember = async (req, res) => {
+const removeWorkspaceMember = async (req, res,next) => {
     try{    
         const { workspaceId, memberId } = req.params;
         const userId = req.user.id;
         const result = await workspaceMemberService.removeWorkspaceMember(workspaceId, memberId, userId);
         res.status(200).json({ success: true, data: result });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 }
-const exitWorkspace = async (req, res) => {
+const exitWorkspace = async (req, res,next) => {
     try {
         const { workspaceId } = req.params;
         const userId = req.user.id;
         const result = await workspaceMemberService.exitWorkspace(workspaceId, userId);
         res.status(200).json({ success: true, data: result });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 }
-async function updateWorkspaceMemberRole(req, res) {
+async function updateWorkspaceMemberRole(req, res,next) {
     try{
         const {workspaceId}= req.params;
         const { memberId, newRole } = req.body;
@@ -37,7 +37,7 @@ async function updateWorkspaceMemberRole(req, res) {
         const result = await workspaceMemberService.updateWorkspaceMemberRole(workspaceId, memberId, newRole, userId);
         res.status(200).json({ success: true, data: result });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error); 
     }
 }
 module.exports={

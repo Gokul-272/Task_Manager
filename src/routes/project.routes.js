@@ -1,0 +1,11 @@
+const projectrouter = require('express').Router();
+const projectController = require('../controllers/project.controller');
+const { authMiddleware } = require('../middleware/auth.middleware');
+const validate = require('../middleware/validate.middleware');
+const { createProjectSchema, updateProjectSchema } = require('../validators/project.validator');
+projectrouter.post('/', authMiddleware, validate(createProjectSchema), projectController.createProject);
+projectrouter.get('/', authMiddleware, projectController.getProjects);
+projectrouter.get('/:projectId', authMiddleware, projectController.getProjectById);
+projectrouter.put('/:projectId', authMiddleware, validate(updateProjectSchema), projectController.updateProject);
+projectrouter.delete('/:projectId', authMiddleware, projectController.deleteProject);
+module.exports = projectrouter;

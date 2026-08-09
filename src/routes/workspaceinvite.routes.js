@@ -1,5 +1,5 @@
 const workspaceInviteRouter = require('express').Router({ mergeParams: true });
-const workspaceInviteController = require('../controllers/workspaceinvite.controller');
+const workspaceInviteController = require('../controllers/workspaceInvite.controller');
 const { authMiddleware } = require('../middleware/auth.middleware');
 const validate = require('../middleware/validate.middleware');
 const {addWorkspaceMemberSchema} = require('../validators/workspaceinvite.validator');

@@ -1,22 +1,65 @@
-const workspaceMemberRepository=require('../repository/workspacemember.repository');
-async function getWorkspaceMembers(workspaceId,userId)
-{
-    return workspaceMemberRepository.getWorkspaceMembers(workspaceId,userId);
+const workspaceMemberRepository = require('../repository/workspacemember.repository');
+const workspaceRepo = require('../repository/workspace.repository');
+const AppError = require('../utils/AppError');
+
+async function getWorkspaceMembers(workspaceId, userId) {
+  const workspace = await workspaceRepo.getWorkspaceById(workspaceId, userId);
+  if (!workspace) {
+    throw new AppError('Workspace not found or access denied', 404);
+  }
+  return workspaceMemberRepository.getWorkspaceMembers(workspaceId);
 }
-async function removeWorkspaceMember(workspaceId,memberId,userId)
-{
-    return workspaceMemberRepository.removeWorkspaceMember(workspaceId,memberId,userId);
+
+async function removeWorkspaceMember(workspaceId, memberId, userId) {
+  const workspace = await workspaceRepo.getWorkspaceById(workspaceId, userId);
+  if (!workspace) {
+    throw new AppError('Workspace not found', 404);
+  }
+
+  const member = await workspaceMemberRepository.isMemberOfWorkspace(workspaceId, memberId);
+  if (!member) {
+    throw new AppError('Member not found', 404);
+  }
+
+  if (memberId === workspace.ownerId) {
+    throw new AppError('Workspace owner cannot be removed', 400);
+  }
+
+  await workspaceMemberRepository.deleteMemberAndInvites(workspaceId, memberId, userId);
+  return { message: 'Workspace member removed successfully' };
 }
-async function exitWorkspace(workspaceId,userId)
-{
-    return workspaceMemberRepository.exitWorkspace(workspaceId,userId);
+
+async function exitWorkspace(workspaceId, userId) {
+  const workspace = await workspaceRepo.getWorkspaceByIdRaw(workspaceId);
+  if (!workspace) {
+    throw new AppError('Workspace not found or access denied', 404);
+  }
+
+  if (userId === workspace.ownerId) {
+    throw new AppError('Workspace owner cannot exit the workspace', 400);
+  }
+
+  await workspaceMemberRepository.deleteMemberAndInvitesOnExit(workspaceId, userId);
+  return { message: 'Exited from workspace successfully' };
 }
+
 async function updateWorkspaceMemberRole(workspaceId, memberId, newRole, userId) {
-    return workspaceMemberRepository.updateWorkspaceMemberRole(workspaceId, memberId, newRole, userId);
+  const workspace = await workspaceRepo.getWorkspaceById(workspaceId, userId);
+  if (!workspace) {
+    throw new AppError('Workspace not found or access denied', 404);
+  }
+
+  const member = await workspaceMemberRepository.isMemberOfWorkspace(workspaceId, memberId);
+  if (!member) {
+    throw new AppError('Member not found or access denied', 404);
+  }
+
+  await workspaceMemberRepository.updateMemberRoleAndTransferOwnership(workspaceId, memberId, userId, newRole);
 }
-module.exports={
-    getWorkspaceMembers,
-    removeWorkspaceMember,
-    exitWorkspace,
-    updateWorkspaceMemberRole
-};  
+
+module.exports = {
+  getWorkspaceMembers,
+  removeWorkspaceMember,
+  exitWorkspace,
+  updateWorkspaceMemberRole,
+};
