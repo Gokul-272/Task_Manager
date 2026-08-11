@@ -16,7 +16,7 @@ const addProjectMember = async (req, res, next) => {
 const getProjectMembers = async (req, res, next) => {
   try {
     const { workspaceId, projectId } = req.params;
-    const result = await projectMemeberService.getProjectMembers(workspaceId, projectId, req.user.id);
+    const result = await projectMemeberService.getProjectMembers(workspaceId, projectId);
     res.status(200).json({
       success: true,
         message: 'Project members retrieved successfully',
@@ -30,7 +30,7 @@ const getProjectMembers = async (req, res, next) => {
 const getProjectMemberById = async (req, res, next) => {
   try {
     const { workspaceId, projectId, memberId } = req.params;
-    const result = await projectMemeberService.getProjectMemberById(workspaceId, projectId, memberId, req.user.id);
+    const result = await projectMemeberService.getProjectMemberById(workspaceId, projectId, memberId);
     if (!result) {
       return res.status(404).json({
         success: false,

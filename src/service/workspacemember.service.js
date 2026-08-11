@@ -11,16 +11,14 @@ async function getWorkspaceMembers(workspaceId, userId) {
 }
 
 async function removeWorkspaceMember(workspaceId, memberId, userId) {
-  const workspace = await workspaceRepo.getWorkspaceById(workspaceId, userId);
+  const workspace = await workspaceRepo.WorkspaceById(workspaceId, userId);
   if (!workspace) {
-    throw new AppError('Workspace not found', 404);
+    throw new AppError('Access denied', 403);
   }
-
   const member = await workspaceMemberRepository.isMemberOfWorkspace(workspaceId, memberId);
   if (!member) {
     throw new AppError('Member not found', 404);
   }
-
   if (memberId === workspace.ownerId) {
     throw new AppError('Workspace owner cannot be removed', 400);
   }
@@ -32,7 +30,7 @@ async function removeWorkspaceMember(workspaceId, memberId, userId) {
 async function exitWorkspace(workspaceId, userId) {
   const workspace = await workspaceRepo.getWorkspaceByIdRaw(workspaceId);
   if (!workspace) {
-    throw new AppError('Workspace not found or access denied', 404);
+    throw new AppError('Workspace not found', 404);
   }
 
   if (userId === workspace.ownerId) {

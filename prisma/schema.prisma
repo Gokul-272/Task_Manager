@@ -128,35 +128,32 @@ model boards {
   deletedAt  DateTime?
   project projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
   creator users    @relation("BoardCreator", fields: [createdBy], references: [id])
-  tasks tasks[]
+  tasks   tasks[] 
   @@unique([projectId, name])
   @@index([projectId])
 }
-
 model tasks {
   id  String   @id @default(uuid()) @db.Uuid
-  boardId String   @db.Uuid
+  boardId     String   @db.Uuid
   title   String   @db.VarChar(255)
   description String?    @db.Text
   assignedTo  String?    @db.Uuid
   createdBy  String     @db.Uuid
-  status  TaskStatus @default(todo)
-  // Order within a Kanban column
+  status     status     @default(TODO)
   position  Int  @default(0)
-
   deadline DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-  board    boards @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  board boards @relation(fields: [boardId], references: [id], onDelete: Cascade)
   assignee users? @relation("TaskAssignee", fields: [assignedTo], references: [id])
   creator  users  @relation("TaskCreator", fields: [createdBy], references: [id])
-  @@index([boardId, status, position])
-
+  @@unique([boardId, status, position])
+  @@index([boardId])
 }
-
-enum TaskStatus {
-  todo
-  inprogress
-  done
+enum status {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
 }

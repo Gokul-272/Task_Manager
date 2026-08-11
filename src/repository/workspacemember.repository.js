@@ -96,6 +96,17 @@ async function updateMemberRoleAndTransferOwnership(workspaceId, memberId, userI
       ownerId: memberId,
     },
   }),
+  prisma.workspaceinvites.update({
+    where: {
+      workspaceId_invitedUser: {
+        workspaceId,
+        invitedUser: memberId,
+      },
+    },
+    data: {
+      invitedBy: userId,
+    },
+  }),
 ]);
 }
 

@@ -9,11 +9,10 @@ async function addProjectMember(projectId, memberId, userId) {
         },
     });
 }
-async function findMembersByProjectId(workspaceId, projectId, userId) {
+async function findMembersByProjectId(workspaceId, projectId) {
     const projectMembers = await prisma.projectmembers.findMany({
         where: {
             projectId,
-            addedBy: userId,
             deletedAt: null,
             project: {
                 workspaceId,
@@ -25,7 +24,16 @@ async function findMembersByProjectId(workspaceId, projectId, userId) {
     });
     return projectMembers;
 }
-async function findmemberById(projectId, memberId, userId) {
+async function findmemberById(projectId, memberId) {
+    return prisma.projectmembers.findFirst({
+        where: {
+            projectId,
+            userId: memberId,
+            deletedAt: null,
+        },
+    });
+}
+async function findmemberByIdAndUpdate(projectId, memberId, userId) {
     return prisma.projectmembers.findFirst({
         where: {
             projectId,
@@ -35,11 +43,13 @@ async function findmemberById(projectId, memberId, userId) {
         },
     });
 }
-async function removemember(memberId) {
+async function removemember(projectId, memberId) {
     return prisma.projectmembers.update({
         where: {
-            userId: memberId,
-            deletedAt: null,
+            projectId_userId: {
+             projectId,
+             userId: memberId,
+            },
         },
         data: {
             deletedAt: new Date(),
@@ -49,11 +59,10 @@ async function removemember(memberId) {
 async function exitProject(projectId, userId) {
     return prisma.projectmembers.update({
         where: {
-                projectId_userId: {
-                    projectId,
-                    userId,
-                    deletedAt: null,
-                },
+           projectId_userId: {
+            projectId,
+            userId,
+       },
         },
         data: {
             deletedAt: new Date(), 
@@ -66,12 +75,11 @@ async function updateRole(projectId, memberId, role, userId) {
             where: {
                 projectId_userId: {
                     projectId,
-                    userId: memberId,
-                    deletedAt: null,
+                    userId: memberId, 
                 },
             },
             data: {
-                role,
+                role:role,
             },
         }),
         prisma.projects.update({
@@ -88,7 +96,6 @@ async function updateRole(projectId, memberId, role, userId) {
                  projectId_userId: {
                     projectId,
                     userId: userId,
-                    deletedAt: null,
                 },
             },
             data: {
@@ -103,7 +110,8 @@ module.exports = {
     addProjectMember,
     findMembersByProjectId,
     findmemberById,
-    removemember,
+    removemember, 
     exitProject,
     updateRole,
+    findmemberByIdAndUpdate
 };

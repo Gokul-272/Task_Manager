@@ -2,7 +2,8 @@ const prisma= require("../config/prisma");
 
 async function createProject(workspaceId, data, userId) {
  const projectData = {
-    ...data,
+    name: data.name,
+    description: data.description || null,
     workspaceId: workspaceId,
     createdBy: userId,
   };
@@ -20,12 +21,15 @@ async function createProject(workspaceId, data, userId) {
   ]);
   return result[0];
 }
-async function getAllProjects(workspaceId, userId, skip, limit, search) {
+async function getAllProjects(workspaceId,userId, skip, limit, search) {
   const where = {
     workspaceId,
-    createdBy: userId,
     deletedAt: null,
-
+    projectMembers: {
+      some: {
+        userId: userId,
+      },
+    },
     ...(search && {
       OR: [
         {
@@ -58,7 +62,45 @@ async function getAllProjects(workspaceId, userId, skip, limit, search) {
 
   return { projects, total };
 }
-async function getProjectById( workspaceId, projectId, userId) {
+async function getProjectById( workspaceId, projectId) {
+    return prisma.projects.findFirst({
+        where: {
+            id: projectId,
+            workspaceId: workspaceId,
+            deletedAt: null,
+        },
+    });
+}
+
+async function projectById(projectId, userId) {
+    return prisma.projects.findFirst({
+        where: {
+            id: projectId,
+            createdBy: userId,
+            deletedAt: null,
+        },
+    });
+}
+async function updateProject(projectId, data) {
+    return prisma.projects.update({
+        where: { id: projectId },
+        data,
+    });
+}
+async function deleteProject(projectId) {
+    const result = await prisma.$transaction([
+        prisma.projects.update({
+            where: { id: projectId },
+            data: { deletedAt: new Date() },
+        }),
+        prisma.projectmembers.updateMany({
+            where: { projectId: projectId ,deletedAt: null},
+            data: { deletedAt: new Date() },    
+        }),
+    ]);
+    return result[0];
+}
+async function findbyId(workspaceId, projectId, userId) {
     return prisma.projects.findFirst({
         where: {
             id: projectId,
@@ -68,32 +110,16 @@ async function getProjectById( workspaceId, projectId, userId) {
         },
     });
 }
-async function projectById(projectId) {
-    return prisma.projects.findFirst({
+//board check
+
+async function isprojectmember(projectId, userId) {
+    return prisma.projectmembers.findFirst({
         where: {
-            id: projectId,
+            projectId: projectId,
+            userId: userId,
             deletedAt: null,
         },
     });
-}
-async function updateProject(projectId, data) {
-    return prisma.projects.update({
-        where: { id: projectId , deletedAt: null },
-        data,
-    });
-}
-async function deleteProject(projectId) {
-    const result = await prisma.$transaction([
-        prisma.projects.updateMany({
-            where: { id: projectId , deletedAt: null },
-            data: { deletedAt: new Date() },
-        }),
-        prisma.projectmembers.update({
-            where: { projectId: projectId ,deletedAt: null},
-            data: { deletedAt: new Date() },    
-        }),
-    ]);
-    return result[0];
 }
 module.exports = {
   createProject,
@@ -102,4 +128,6 @@ module.exports = {
   projectById,
   updateProject,
   deleteProject,
+  findbyId,
+  isprojectmember
 };

@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
@@ -9,21 +10,24 @@ const invitationRoutes = require('./routes/invitation.routes');
 const workspaceMemberRoutes = require('./routes/workspacemember.routes');
 const projectRoutes = require('./routes/project.routes');
 const ProjectMemberRoutes = require('./routes/projectmember.routes');
+const boardRoutes = require('./routes/board.routes');
 const errorMiddleware = require('./middleware/error.middleware');
-const app = express();
 
+const app = express();
+app.use(helmet());
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/workspaces', workspaceRoutes);
-app.use('/api/workspaces/:workspaceId/invite', workspaceInviteRoutes);
-app.use('/api/invitations', invitationRoutes);
-app.use('/api/workspaces/:workspaceId/members', workspaceMemberRoutes);
-app.use('/api/workspaces/:workspaceId/projects', projectRoutes);
-app.use('/api/workspaces/:workspaceId/projects/:projectId/members', ProjectMemberRoutes);
+app.use('/api/auth',authRoutes);
+app.use('/api/users',userRoutes);
+app.use('/api/workspaces',workspaceRoutes);
+app.use('/api/workspaces/:workspaceId/invite',workspaceInviteRoutes);
+app.use('/api/invitations',invitationRoutes);
+app.use('/api/workspaces/:workspaceId/members',workspaceMemberRoutes);
+app.use('/api/workspaces/:workspaceId/projects',projectRoutes);
+app.use('/api/workspaces/:workspaceId/projects/:projectId/members',ProjectMemberRoutes);
+app.use('/api/workspaces/:workspaceId/projects/:projectId/boards',boardRoutes);
 app.get('/health', (req, res) => {
   console.log('Health check endpoint hit');
   res.status(200).json({

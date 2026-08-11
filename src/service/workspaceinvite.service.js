@@ -4,7 +4,7 @@ const userRepo = require('../repository/user.repository');
 const AppError = require('../utils/AppError');
 
 async function sendWorkspaceInvite(workspaceId, email, senderId) {
-  const workspace = await workspaceRepo.getWorkspaceById(workspaceId, senderId);
+  const workspace = await workspaceRepo.WorkspaceById(workspaceId, senderId);
   if (!workspace) {
     throw new AppError('Workspace not found',404);
   }

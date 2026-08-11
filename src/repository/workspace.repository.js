@@ -2,7 +2,11 @@ const prisma = require("../config/prisma");
 async function createWorkspace(data) {
   const workspace = await prisma.$transaction([
     prisma.workspaces.create({
-      data,
+      data: {
+        name: data.name,
+        description: data.description || null,
+        ownerId: data.ownerId,
+      },
     }),
     await prisma.workspacemembers.create({
       data: {
@@ -12,14 +16,18 @@ async function createWorkspace(data) {
       },
     }),
   ]);
-
   return workspace;
-}
-async function getAllWorkspaces(userId) {
+}async function getAllWorkspaces(userId) {
   return prisma.workspaces.findMany({
     where: {
-      ownerId: userId,
       deletedAt: null,
+      OR: [
+        { ownerId: userId },                
+        {
+          members: {
+            some: {userId: userId,},
+          },
+        },],
     },
   });
 }
@@ -27,24 +35,41 @@ async function getWorkspaceById(id, userId) {
   return prisma.workspaces.findFirst({
     where: {
       id,
-      ownerId: userId,
       deletedAt: null,
+      OR: [
+        { ownerId: userId },                
+        {
+          members: {
+            some: {userId: userId,},
+          },
+        },],
     },
+    },
+  )};
+async function WorkspaceById(id, userId) {
+  return prisma.workspaces.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+      ownerId: userId },
   });
 }
-
 async function updateWorkspace(id, data) {
   return prisma.workspaces.update({
-    where: { id,deletedAt: null,},
+    where: { id},
     data,
   });
 }
 async function deleteWorkspace(id) {
-  return prisma.workspaces.update({
-    where: { id },
+   prisma.workspaces.update({
+    where: { id: workspaceId },
+    data: { deletedAt: new Date() },
+  }),
+
+  prisma.projects.updateMany({
+    where: { workspaceId, deletedAt: null },
     data: { deletedAt: new Date() },
   });
-
 }
 
-module.exports = { createWorkspace, getAllWorkspaces, getWorkspaceById, updateWorkspace, deleteWorkspace, };
+module.exports = { createWorkspace, getAllWorkspaces,WorkspaceById, getWorkspaceById, updateWorkspace, deleteWorkspace, };
