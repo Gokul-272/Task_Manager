@@ -31,7 +31,6 @@ model users {
   addedProjectMembers projectmembers[] @relation("ProjectMemberAdder")
   sentWorkspaceInvites workspaceinvites[] @relation("WorkspaceInviteSender")
   receivedWorkspaceInvites workspaceinvites[] @relation("WorkspaceInviteReceiver")
-  @@index([deletedAt])
 }
 
 model workspaces {
@@ -85,9 +84,6 @@ model workspaceinvites {
 
   @@unique([workspaceId, invitedUser])
   @@index([workspaceId])
-  @@index([invitedBy])
-  @@index([invitedUser])
-  @@index([status])
 }
 
 model projects {
@@ -104,9 +100,7 @@ model projects {
   creator   users      @relation("ProjectCreator", fields: [createdBy], references: [id])
   projectMembers projectmembers[]
   boards         boards[]
-  @@index([workspaceId])
-  @@index([createdBy])
-  @@index([deletedAt])
+  @@unique([workspaceId, name])
 }
 
 model projectmembers {
@@ -121,8 +115,6 @@ model projectmembers {
   user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
   addedByUser users    @relation("ProjectMemberAdder", fields: [addedBy], references: [id])
   @@unique([projectId, userId,deletedAt])
-  @@index([userId])
-  @@index([addedBy])
 }
 
 model boards {
@@ -139,8 +131,6 @@ model boards {
   tasks tasks[]
   @@unique([projectId, name])
   @@index([projectId])
-  @@index([createdBy])
-  @@index([deletedAt])
 }
 
 model tasks {
@@ -161,14 +151,8 @@ model tasks {
   board    boards @relation(fields: [boardId], references: [id], onDelete: Cascade)
   assignee users? @relation("TaskAssignee", fields: [assignedTo], references: [id])
   creator  users  @relation("TaskCreator", fields: [createdBy], references: [id])
-
-  @@index([boardId])
-  @@index([assignedTo])
-  @@index([createdBy])
-  @@index([status])
-  @@index([boardId, status])
   @@index([boardId, status, position])
-  @@index([deletedAt])
+
 }
 
 enum TaskStatus {

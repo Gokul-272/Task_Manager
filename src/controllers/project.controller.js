@@ -1,4 +1,4 @@
-const projectService = require('../services/project.service');
+const projectService = require('../service/project.service');
 const createProject = async (req, res, next) => {
   try {
     const { workspaceId } = req.params;
@@ -17,11 +17,15 @@ const createProject = async (req, res, next) => {
 const getAllProjects = async (req, res, next) => {
   try {
     const { workspaceId } = req.params;
-    const result = await projectService.getAllProjects(workspaceId, req.user.id);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+    const skip = (page - 1) * limit;
+    const result = await projectService.getAllProjects(workspaceId, req.user.id, { skip, limit, search });
     res.status(200).json({
       success: true,
         message: 'Projects retrieved successfully',
-        data: result
+        ...result
     });
   }
     catch (error) {

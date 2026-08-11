@@ -1,16 +1,18 @@
 const prisma = require("../config/prisma");
-
 async function createWorkspace(data) {
-  const workspace = await prisma.workspaces.create({
-    data,
-  });
-  await prisma.workspacemembers.create({
-    data: {
-      workspaceId: workspace.id,
-      userId: data.ownerId,
-      role: "owner",
-    },
-  });
+  const workspace = await prisma.$transaction([
+    prisma.workspaces.create({
+      data,
+    }),
+    await prisma.workspacemembers.create({
+      data: {
+        workspaceId: workspace.id,
+        userId: data.ownerId,
+        role: 'owner',
+      },
+    }),
+  ]);
+
   return workspace;
 }
 async function getAllWorkspaces(userId) {

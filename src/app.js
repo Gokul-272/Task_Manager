@@ -8,6 +8,7 @@ const workspaceInviteRoutes = require('./routes/workspaceinvite.routes');
 const invitationRoutes = require('./routes/invitation.routes');
 const workspaceMemberRoutes = require('./routes/workspacemember.routes');
 const projectRoutes = require('./routes/project.routes');
+const ProjectMemberRoutes = require('./routes/projectmember.routes');
 const errorMiddleware = require('./middleware/error.middleware');
 const app = express();
 
@@ -22,6 +23,7 @@ app.use('/api/workspaces/:workspaceId/invite', workspaceInviteRoutes);
 app.use('/api/invitations', invitationRoutes);
 app.use('/api/workspaces/:workspaceId/members', workspaceMemberRoutes);
 app.use('/api/workspaces/:workspaceId/projects', projectRoutes);
+app.use('/api/workspaces/:workspaceId/projects/:projectId/members', ProjectMemberRoutes);
 app.get('/health', (req, res) => {
   console.log('Health check endpoint hit');
   res.status(200).json({

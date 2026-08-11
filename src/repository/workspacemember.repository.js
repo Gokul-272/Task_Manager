@@ -63,34 +63,40 @@ async function deleteMemberAndInvitesOnExit(workspaceId, userId) {
 }
 
 async function updateMemberRoleAndTransferOwnership(workspaceId, memberId, userId, newRole) {
-  return prisma.$transaction([
-    prisma.workspacemembers.updateMany({
-      where: {
+ return prisma.$transaction([
+  prisma.workspacemembers.update({
+    where: {
+      workspaceId_userId: {
         workspaceId,
         userId: memberId,
       },
-      data: {
-        role: newRole,
-      },
-    }),
-    prisma.workspacemembers.updateMany({
-      where: {
+    },
+    data: {
+      role: newRole,
+    },
+  }),
+
+  prisma.workspacemembers.update({
+    where: {
+      workspaceId_userId: {
         workspaceId,
-        userId: userId,
+        userId,
       },
-      data: {
-        role: 'member',
-      },
-    }),
-    prisma.workspaces.update({
-      where: {
-        id: workspaceId,
-      },
-      data: {
-        ownerId: memberId,
-      },
-    }),
-  ]);
+    },
+    data: {
+      role: 'member',
+    },
+  }),
+
+  prisma.workspaces.update({
+    where: {
+      id: workspaceId,
+    },
+    data: {
+      ownerId: memberId,
+    },
+  }),
+]);
 }
 
 module.exports = {

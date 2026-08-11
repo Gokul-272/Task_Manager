@@ -1,0 +1,12 @@
+const projectmemberrouter = require('express').Router({mergeParams: true});
+const projectMemberController = require('../controllers/projectmember.controller');
+const { authMiddleware } = require('../middleware/auth.middleware');
+const validate = require('../middleware/validate.middleware');
+const { addProjectMemberSchema, updateProjectMemberRoleSchema } = require('../validators/projectmember.validator');
+projectmemberrouter.post('/', authMiddleware, validate(addProjectMemberSchema), projectMemberController.addProjectMember);
+projectmemberrouter.get('/', authMiddleware, projectMemberController.getProjectMembers);
+projectmemberrouter.get('/:memberId', authMiddleware, projectMemberController.getProjectMemberById);
+projectmemberrouter.delete('/:memberId', authMiddleware, projectMemberController.removeProjectMember);
+projectmemberrouter.delete('/exit', authMiddleware, projectMemberController.exitProject);
+projectmemberrouter.patch('/update-role', authMiddleware, validate(updateProjectMemberRoleSchema), projectMemberController.updateProjectMemberRole);
+module.exports = projectmemberrouter;
