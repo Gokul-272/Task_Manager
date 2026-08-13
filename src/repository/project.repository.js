@@ -21,7 +21,7 @@ async function createProject(workspaceId, data, userId) {
   ]);
   return result[0];
 }
-async function getAllProjects(workspaceId,userId, skip, limit, search) {
+async function getAllProjects(workspaceId,userId, skip, limit, search, status) {
   const where = {
     workspaceId,
     deletedAt: null,
@@ -45,6 +45,9 @@ async function getAllProjects(workspaceId,userId, skip, limit, search) {
           },
         },
       ],
+    }),
+    ...(status && {
+      status,
     }),
   };
 

@@ -1,0 +1,13 @@
+const taskrouter=express.Router({ mergeParams:true });
+const taskController=require('../controllers/task.controller');
+const { authMiddleware }=require('../middleware/auth.middleware');
+const { validate }=require('../middleware/validate.middleware');
+const { createTaskSchema, updateTaskSchema, reorderTasksSchema,moveTaskSchema }=require('../validators/task.validator');
+taskrouter.post('/',authMiddleware,validate(createTaskSchema),taskController.createTask);
+taskrouter.get('/',authMiddleware,taskController.getAllTasks);
+taskrouter.get('/:taskId',authMiddleware,taskController.getTaskById);
+taskrouter.patch('/:taskId',authMiddleware,validate(updateTaskSchema),taskController.updateTask);
+taskrouter.delete('/:taskId',authMiddleware,taskController.deleteTask);
+taskrouter.patch('/:taskId/move', authMiddleware, validate(moveTaskSchema), taskController.moveTask);
+taskrouter.patch('/reorder',authMiddleware,validate(reorderTasksSchema),taskController.reorderTasks);
+module.exports = taskrouter;

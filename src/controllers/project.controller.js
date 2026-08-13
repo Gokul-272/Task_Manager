@@ -21,7 +21,8 @@ const getAllProjects = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
     const search = req.query.search || '';
     const skip = (page - 1) * limit;
-    const result = await projectService.getAllProjects(workspaceId, req.user.id, { skip, limit, search });
+    const status = req.query.status;
+    const result = await projectService.getAllProjects(workspaceId, req.user.id, { skip, limit, search,status });
     res.status(200).json({
       success: true,
         message: 'Projects retrieved successfully',

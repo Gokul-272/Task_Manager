@@ -1,0 +1,11 @@
+const boardcolumnRouter=require('express').Router({ mergeParams: true });
+const boardcolumnController=require('../controllers/boardcolumn.controller');
+const {validate}=require('../middleware/validate.middleware');
+const {createBoardColumnSchema ,updateBoardColumnnameSchema,reorderBoardColumnSchema}=require('../validators/boardcolumn.validator');
+const { authMiddleware }=require('../middleware/auth.middleware');
+boardcolumnRouter.post('/',authMiddleware,validate(createBoardColumnSchema),boardcolumnController.createBoardColumn);
+boardcolumnRouter.get('/',authMiddleware,boardcolumnController.getAllBoardColumns);
+boardcolumnRouter.patch('/reorder',authMiddleware,validate(reorderBoardColumnSchema),boardcolumnController.reorderBoardColumns);
+boardcolumnRouter.put('/:columnId',authMiddleware,validate(updateBoardColumnnameSchema),boardcolumnController.updateBoardColumnname);
+boardcolumnRouter.delete('/:columnId',authMiddleware,boardcolumnController.deleteBoardColumn);
+module.exports=boardcolumnRouter;

@@ -8,12 +8,12 @@ async function createProject(workspaceId, data, userId) {
   }
   return ProjectRepository.createProject(workspaceId, data, userId);
 }
-async function getAllProjects(workspaceId,userId, { skip, limit, search }) {
+async function getAllProjects(workspaceId,userId, { skip, limit, search ,status}) {
   const workspace = await WorkspaceRepository.getWorkspaceById(workspaceId, userId);
     if (!workspace) {
         throw new AppError('Workspace not found', 404);
     }
-    return ProjectRepository.getAllProjects(workspaceId,userId, skip, limit, search );
+    return ProjectRepository.getAllProjects(workspaceId,userId, skip, limit, search ,status);
 }
 async function getProjectById(workspaceId, projectId, userId) {
   const workspace = await WorkspaceRepository.getWorkspaceById(workspaceId, userId);
@@ -47,7 +47,7 @@ async function deleteProject(workspaceId, projectId, userId) {
 module.exports = {
   createProject,
   getAllProjects,
-    getProjectById,
-    updateProject,
-    deleteProject
+  getProjectById,
+  updateProject,
+  deleteProject
 }
