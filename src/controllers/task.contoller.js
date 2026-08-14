@@ -85,8 +85,8 @@ const moveTask=async(req,res,next)=>
     try{
         const {boardId,columnId,taskId}=req.params;
         const userId=req.user.id;
-        const {targetColumnId,targetPosition}=req.body;
-        const task=await taskservice.moveTask(boardId,columnId,taskId,userId,targetColumnId,targetPosition);
+        const {targetColumnId,targetPosition,orderedTaskIds}=req.body;
+        const task=await taskservice.moveTask(boardId,columnId,taskId,userId,targetColumnId,targetPosition,orderedTaskIds);
         if(!task)
         {
             return res.status(404).json({
@@ -98,29 +98,6 @@ const moveTask=async(req,res,next)=>
             success:true,
             message:'Task moved successfully',
             data:task
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-const reorderTasks=async(req,res,next)=>
-{
-    try{
-        const {boardId,columnId}=req.params;
-        const userId=req.user.id;
-        const {orderedTaskIds}=req.body;
-        const result=await taskservice.reorderTasks(boardId,columnId,userId,orderedTaskIds);
-        if(!result)
-        {
-            return res.status(404).json({
-                success:false,
-                message:'Reorder operation failed. Invalid task IDs or column.'
-            });
-        }
-        res.status(200).json({
-            success:true,
-            message:'Tasks reordered successfully',
-            data:result
         });
     } catch (error) {
         next(error);
@@ -154,6 +131,5 @@ module.exports={
     getTaskById,
     updateTask,
     moveTask,
-    reorderTasks,
     deleteTask
 };

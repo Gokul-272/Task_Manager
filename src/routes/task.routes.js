@@ -9,5 +9,4 @@ taskrouter.get('/:taskId',authMiddleware,taskController.getTaskById);
 taskrouter.patch('/:taskId',authMiddleware,validate(updateTaskSchema),taskController.updateTask);
 taskrouter.delete('/:taskId',authMiddleware,taskController.deleteTask);
 taskrouter.patch('/:taskId/move', authMiddleware, validate(moveTaskSchema), taskController.moveTask);
-taskrouter.patch('/reorder',authMiddleware,validate(reorderTasksSchema),taskController.reorderTasks);
 module.exports = taskrouter;

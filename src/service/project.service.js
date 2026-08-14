@@ -31,7 +31,11 @@ async function updateProject(workspaceId, projectId, data, userId) {
     if (!project) {
         throw new AppError('You are not the owner of this project to update', 403);
     }
-    return ProjectRepository.updateProject(projectId, data);
+    const updatedProject = await ProjectRepository.updateProject(projectId, data);
+    if (!updatedProject) {
+        throw new AppError('Failed to update project', 500);
+    }
+    return updatedProject;
 }
 async function deleteProject(workspaceId, projectId, userId) {
     const project = await ProjectRepository.findbyId(workspaceId, projectId,userId);

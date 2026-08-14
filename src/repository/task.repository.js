@@ -39,18 +39,16 @@ async function getTaskById(columnId, taskId) {
         },
     });
 }
-async function updateTask(columnId, taskId, data) {
-    return prisma.tasks.updateMany({
+async function updateTask(taskId, data) {
+    return prisma.tasks.update({
         where: {
             id: taskId,
-            columnId: columnId,
-            deletedAt: null,
         },
         data: data
     });
 }
 async function moveTask(columnId, taskId, newColumnId, newPosition) {
-    return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const task = await tx.tasks.findFirst({
       where: {
         id: taskId,
@@ -70,6 +68,9 @@ async function moveTask(columnId, taskId, newColumnId, newPosition) {
         position: 'desc',
       },
     });
+    if(newColumnId === columnId && newPosition === task.position) {
+      return task;
+    }
     const maxPosition =lastTask?lastTask.position + 1:0;
     if (newPosition < 0 || newPosition > maxPosition) {
       return null;
@@ -116,11 +117,82 @@ async function moveTask(columnId, taskId, newColumnId, newPosition) {
       },
     });
   });
+  return result;
 }    
+async function reorderTasks(columnId, orderedTaskIds) {
+    return prisma.$transaction(async (tx) => {
+      const tasks = await tx.tasks.findMany({
+        where: {
+          id: { in: orderedTaskIds },
+          columnId: columnId,
+          deletedAt: null,
+        },
+      });
+      const uniqueIds = new Set(orderedTaskIds);
+      if (tasks.length !== orderedTaskIds.length && uniqueIds.size !== orderedTaskIds.length) {
+        return null;
+      }
+      for (let i = 0; i < orderedTaskIds.length; i++) {
+      await tx.tasks.update({
+        where: { id: orderedTaskIds[i] },
+        data: { position: i },
+      });
+    }
+    return tx.tasks.findMany({
+      where: {
+        columnId,
+        deletedAt: null,
+      },
+      orderBy: {
+        position: 'asc',
+      },
+    });
+  });
+}
+async function deleteTask(columnId, taskId) {
+    return prisma.$transaction(async (tx) => {
+      const task = await tx.tasks.findFirst({
+        where: {
+          id: taskId,
+          columnId: columnId,
+          deletedAt: null,
+        },
+      });
+      if(!task) {
+        return null;
+      }
+      await tx.tasks.update({
+        where: {
+          id: taskId,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+      const result = await tx.tasks.updateMany({
+        where: {
+          columnId: columnId,
+          deletedAt: null,
+          position: {
+            gt: task.position,
+          },
+        },
+        data: {
+          position: {
+            decrement: 1,
+          },
+        },
+      });
+      return task;
+    });
+}
+
 module.exports = {
     createTask,
     getAllTasks,
     getTaskById,
     updateTask,
-    moveTask
+    moveTask,
+    reorderTasks,
+    deleteTask
 };

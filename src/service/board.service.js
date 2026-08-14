@@ -8,6 +8,9 @@ async function createBoard(projectId,userId,data) {
         throw new AppError('Project not found', 404);
     }
     const board = await boardRepository.createBoard(projectId,userId,data);
+    if (!board) {
+        throw new AppError('Failed to create board', 500);
+    }
     return board;
 }
 
@@ -17,6 +20,9 @@ async function getAllBoards(projectId, userId) {
         throw new AppError('You are not a member of this project to get boards', 404);
     }
     const boards = await boardRepository.getBoardsByProjectId(projectId);
+    if (!boards || boards.length === 0) {
+        throw new AppError('No boards found for this project', 404);
+    }
     return boards;
 }
 async function getBoardById(projectId, boardId, userId) {
@@ -36,6 +42,9 @@ async function updateBoard(boardId, userId, data) {
         throw new AppError('You are not the owner of this board to update', 403);
     }
     const updatedBoard = await boardRepository.updateBoard(boardId, data);
+    if (!updatedBoard) {
+        throw new AppError('Failed to update board', 500);
+    }
     return updatedBoard;
 }
 async function deleteBoard(boardId, userId) {
@@ -44,6 +53,9 @@ async function deleteBoard(boardId, userId) {
         throw new AppError('You are not the owner of this board to delete', 403);
     }
     const deletedBoard = await boardRepository.deleteBoard(boardId);
+    if (!deletedBoard) {
+        throw new AppError('Failed to delete board', 500);
+    }
     return deletedBoard;
 }
 module.exports = {
