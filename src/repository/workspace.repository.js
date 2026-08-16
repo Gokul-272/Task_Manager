@@ -17,14 +17,15 @@ async function createWorkspace(data) {
     }),
   ]);
   return workspace;
-}async function getAllWorkspaces(userId) {
+}
+async function getAllWorkspaces(userId) {
   return prisma.workspaces.findMany({
     where: {
       deletedAt: null,
       OR: [
         { ownerId: userId },                
         {
-          members: {
+          workspaceMembers: {
             some: {userId: userId,},
           },
         },],
@@ -39,7 +40,7 @@ async function getWorkspaceById(id, userId) {
       OR: [
         { ownerId: userId },                
         {
-          members: {
+          workspaceMembers: {
             some: {userId: userId,},
           },
         },],
@@ -51,7 +52,8 @@ async function WorkspaceById(id, userId) {
     where: {
       id,
       deletedAt: null,
-      ownerId: userId },
+      ownerId: userId 
+    },
   });
 }
 async function updateWorkspace(id, data) {

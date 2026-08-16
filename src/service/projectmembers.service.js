@@ -57,7 +57,7 @@ async function exitProject(projectId, userId) {
     if (!project) {
         throw new AppError('You are not a member of this project', 404);
     }
-    const Member = await projectMemberRepository.exitProject(projectId, userId);
+    const Member = await projectMemberRepository.removemember(projectId, userId);
     return Member;
 }
 module.exports = {

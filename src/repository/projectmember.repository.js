@@ -44,7 +44,20 @@ async function findmemberByIdAndUpdate(projectId, memberId, userId) {
     });
 }
 async function removemember(projectId, memberId) {
-    return prisma.projectmembers.update({
+    return prisma.$transaction([
+    prisma.tasks.updateMany({
+      where: {
+        assignedTo: memberId,
+        board: {
+          projectId,
+        },
+        deletedAt: null,
+      },
+      data: {
+        assignedTo: null,
+      },
+    }),
+    prisma.projectmembers.update({
         where: {
             projectId_userId: {
              projectId,
@@ -54,23 +67,32 @@ async function removemember(projectId, memberId) {
         data: {
             deletedAt: new Date(),
         },
-    });
-}
-async function exitProject(projectId, userId) {
-    return prisma.projectmembers.update({
-        where: {
-           projectId_userId: {
-            projectId,
-            userId,
-       },
-        },
-        data: {
-            deletedAt: new Date(), 
-        },
-    });
+    })
+    ]);
 }
 async function updateRole(projectId, memberId, role, userId) {
     const updatedMember = await prisma.$transaction([
+      prisma.tasks.updateMany({
+        where: {
+            createdBy: userId,
+            board: {
+                projectId,
+            },
+        },
+        data: {
+          createdBy: memberId,
+        },
+        }),
+       prisma.boards.updateMany({
+            where: {
+                project: {
+                    id: projectId,
+                },
+            },
+            data: {
+                createdBy: memberId,
+            },
+        }),
         prisma.projectmembers.update({
             where: {
                 projectId_userId: {
@@ -88,7 +110,6 @@ async function updateRole(projectId, memberId, role, userId) {
             },
             data: {
                 createdBy: memberId,
-
             },
         }),
         prisma.projectmembers.update({
@@ -111,7 +132,6 @@ module.exports = {
     findMembersByProjectId,
     findmemberById,
     removemember, 
-    exitProject,
     updateRole,
     findmemberByIdAndUpdate
 };

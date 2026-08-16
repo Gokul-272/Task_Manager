@@ -3,5 +3,3 @@ node_modules
 .env
 
 /generated/prisma
-CODE_REVIEW.md
-ROUTES.md

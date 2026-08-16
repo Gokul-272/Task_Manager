@@ -60,7 +60,7 @@ model workspacemembers {
   joinedAt DateTime @default(now())
   role role @default(member)
   workspace workspaces @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  user      users      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  users @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([workspaceId, userId])
   @@index([userId])
 }
@@ -71,17 +71,16 @@ enum InviteStatus {
 }
 
 model workspaceinvites {
-  id          String       @id @default(uuid()) @db.Uuid
-  workspaceId String       @db.Uuid
-  invitedBy   String       @db.Uuid
-  invitedUser String       @db.Uuid
-  status      InviteStatus @default(PENDING)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id  String @id @default(uuid()) @db.Uuid
+  workspaceId String @db.Uuid
+  invitedBy String  @db.Uuid
+  invitedUser String @db.Uuid
+  status  InviteStatus @default(PENDING)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime @updatedAt
   workspace workspaces @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   inviter users @relation("WorkspaceInviteSender",fields: [invitedBy],references: [id])
   user users @relation("WorkspaceInviteReceiver",fields: [invitedUser],references: [id])
-
   @@unique([workspaceId, invitedUser])
   @@index([workspaceId])
 }
@@ -100,11 +99,11 @@ model projects {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime? 
-  status      ProjectStatus @default(ACTIVE)
+  status ProjectStatus @default(ACTIVE)
   workspace workspaces @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  creator   users      @relation("ProjectCreator", fields: [createdBy], references: [id])
+  creator  users @relation("ProjectCreator", fields: [createdBy], references: [id])
   projectMembers projectmembers[]
-  boards         boards[]
+  boards  boards[]
   @@unique([workspaceId, name])
 }
 
@@ -116,17 +115,17 @@ model projectmembers {
   joinedAt DateTime @default(now())
   role role @default(member)
   deletedAt DateTime?
-  project     projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  addedByUser users    @relation("ProjectMemberAdder", fields: [addedBy], references: [id])
+  project projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addedByUser users @relation("ProjectMemberAdder", fields: [addedBy], references: [id])
   @@unique([projectId, userId,deletedAt])
 }
 model boards {
   id   String   @id @default(uuid()) @db.Uuid
-  projectId String   @db.Uuid
-  name String   @db.VarChar(255)
-  description String?  @db.Text
-  createdBy String   @db.Uuid
+  projectId String  @db.Uuid
+  name String @db.VarChar(255)
+  description String? @db.Text
+  createdBy String @db.Uuid
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
@@ -140,7 +139,7 @@ model boards {
 
 model boardcolumns {
   id  String  @id @default(uuid()) @db.Uuid
-  boardId  String   @db.Uuid
+  boardId  String  @db.Uuid
   name  String  @db.VarChar(255)
   position  Int
   createdAt DateTime @default(now())
@@ -151,13 +150,12 @@ model boardcolumns {
   @@unique([boardId, name])
   @@unique([boardId, position])
   @@index([boardId])
-  @@index([deletedAt])
 }
 
 model tasks {
   id  String   @id @default(uuid()) @db.Uuid
   boardId String   @db.Uuid
-  columnId String   @db.Uuid
+  columnId String  @db.Uuid
   title String   @db.VarChar(255)
   description String?  @db.Text
   assignedTo String?  @db.Uuid
@@ -171,7 +169,7 @@ model tasks {
   board boards @relation(fields: [boardId], references: [id], onDelete: Cascade)
   column boardcolumns @relation(fields: [columnId], references: [id], onDelete: Cascade)
   assignee users? @relation("TaskAssignee", fields: [assignedTo], references: [id])
-  creator  users @relation("TaskCreator", fields: [createdBy], references: [id])
+  creator users @relation("TaskCreator", fields: [createdBy], references: [id])
   @@unique([columnId, position])
   @@index([deletedAt])
 }

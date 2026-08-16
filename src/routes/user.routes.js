@@ -3,4 +3,8 @@ const userController = require('../controllers/user.controller');
 const { authMiddleware } = require('../middleware/auth.middleware');
 userrouter.get('/me',authMiddleware,userController.getCurrentUser);
 userrouter.patch('/update',authMiddleware,userController.updateUser);
+userrouter.delete('/delete',authMiddleware,userController.deleteUser);
+userrouter.get('/dashboard',authMiddleware,userController.getUserDashboard);
+userrouter.get('/owned',authMiddleware,userController.myownedWorkspaces);
+userrouter.get('/workspaces/:workspaceId/myprojects',authMiddleware,userController.getmyprojects);
 module.exports = userrouter;
