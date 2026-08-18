@@ -1,6 +1,6 @@
 const boardcolumnRouter=require('express').Router({ mergeParams: true });
 const boardcolumnController=require('../controllers/boardcolumn.controller');
-const {validate}=require('../middleware/validate.middleware');
+const validate=require('../middleware/validate.middleware');
 const {createBoardColumnSchema ,updateBoardColumnnameSchema,reorderBoardColumnSchema}=require('../validators/boardcolumn.validator');
 const { authMiddleware }=require('../middleware/auth.middleware');
 boardcolumnRouter.post('/',authMiddleware,validate(createBoardColumnSchema),boardcolumnController.createBoardColumn);

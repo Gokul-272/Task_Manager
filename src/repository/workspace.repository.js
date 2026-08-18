@@ -1,22 +1,22 @@
 const prisma = require("../config/prisma");
 async function createWorkspace(data) {
-  const workspace = await prisma.$transaction([
-    prisma.workspaces.create({
+ return await prisma.$transaction(async (tx) => {
+    const workspace = await tx.workspaces.create({
       data: {
         name: data.name,
         description: data.description || null,
         ownerId: data.ownerId,
       },
-    }),
-    await prisma.workspacemembers.create({
+    });
+    await tx.workspacemembers.create({
       data: {
         workspaceId: workspace.id,
         userId: data.ownerId,
-        role: 'owner',
+        role: "owner",
       },
-    }),
-  ]);
-  return workspace;
+    });
+    return workspace;
+  });
 }
 async function getAllWorkspaces(userId) {
   return prisma.workspaces.findMany({

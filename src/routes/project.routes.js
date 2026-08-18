@@ -6,6 +6,6 @@ const { createProjectSchema, updateProjectSchema } = require('../validators/proj
 projectrouter.post('/', authMiddleware, validate(createProjectSchema), projectController.createProject);
 projectrouter.get('/', authMiddleware, projectController.getAllProjects);
 projectrouter.get('/:projectId', authMiddleware, projectController.getProjectById);
-projectrouter.put('/:projectId', authMiddleware, validate(updateProjectSchema), projectController.updateProject);
+projectrouter.patch('/:projectId', authMiddleware, validate(updateProjectSchema), projectController.updateProject);
 projectrouter.delete('/:projectId', authMiddleware, projectController.deleteProject);
 module.exports = projectrouter;

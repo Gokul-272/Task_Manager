@@ -9,7 +9,9 @@ const createWorkspace = async (req, res, next) => {
       data: result
     });
   } catch (error) {
-    next(error);
+     console.error("CREATE WORKSPACE ERROR:", error);
+     console.error("STACK:", error.stack);
+     next(error);
   }
 };
 const getAllWorkspaces = async (req, res, next) => {

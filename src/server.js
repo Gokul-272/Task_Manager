@@ -16,5 +16,14 @@ async function startserver()
     await prisma.$disconnect();
     process.exit(1);
   }
+  finally{
+    process.on('SIGINT',async()=>{
+      console.log("Interrupt received, closing the server...");
+      await prisma.$disconnect();
+      await redis.disconnect();
+      process.exit(0);
+    });
+  }
 }
 startserver();
+
