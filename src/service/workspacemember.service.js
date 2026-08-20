@@ -28,16 +28,20 @@ async function removeWorkspaceMember(workspaceId, memberId, userId) {
 }
 
 async function exitWorkspace(workspaceId, userId) {
-  const workspace = await workspaceRepo.getWorkspaceByIdRaw(workspaceId);
+   console.log("5. EXIT SERVICE HIT");
+  const workspace = await workspaceRepo.getWorkspaceById(workspaceId, userId);
+   console.log("6. WORKSPACE:", workspace);
   if (!workspace) {
     throw new AppError('Workspace not found', 404);
   }
-
   if (userId === workspace.ownerId) {
     throw new AppError('Workspace owner cannot exit the workspace', 400);
   }
-
+  console.log("8. OWNER ID:", workspace.ownerId);
+  console.log("9. USER ID:", userId);
+  console.log("11. STARTING TRANSACTION");
   await workspaceMemberRepository.deleteMemberAndInvitesOnExit(workspaceId, userId);
+  console.log("12. TRANSACTION SUCCESS");
   return { message: 'Exited from workspace successfully' };
 }
 

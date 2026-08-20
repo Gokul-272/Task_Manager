@@ -21,11 +21,16 @@ const removeWorkspaceMember = async (req, res,next) => {
 }
 const exitWorkspace = async (req, res,next) => {
     try {
+         console.log("1. EXIT CONTROLLER HIT");
         const { workspaceId } = req.params;
         const userId = req.user.id;
+        console.log("2. workspaceId:", workspaceId);
+        console.log("3. userId:", userId);
         const result = await workspaceMemberService.exitWorkspace(workspaceId, userId);
+        console.log("4. EXIT SERVICE SUCCESS");
         res.status(200).json({ success: true, data: result });
     } catch (error) {
+        console.log("EXIT CONTROLLER ERROR:", error);
         next(error);
     }
 }

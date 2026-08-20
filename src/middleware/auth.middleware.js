@@ -1,6 +1,7 @@
 const jwt=require('jsonwebtoken');
 const env=require('../config/env');
 async function authMiddleware(req,res,next){
+  console.log("AUTH MIDDLEWARE HIT");
   const authHeader = req.cookies.accessToken;
   if (!authHeader) {
     return res.status(401).json({
@@ -13,6 +14,7 @@ async function authMiddleware(req,res,next){
     req.user = {
     id: decoded.userId,
     };
+     console.log("Authenticated user:", req.user);
     next();
 }catch(error){
         return res.status(401).json({

@@ -1,25 +1,27 @@
 const prisma= require("../config/prisma");
 
 async function createProject(workspaceId, data, userId) {
- const projectData = {
-    name: data.name,
-    description: data.description || null,
-    workspaceId: workspaceId,
-    createdBy: userId,
-  };
-  const result = await prisma.$transaction([
-    prisma.projects.create({
-      data: projectData,
-    }),
-    prisma.projectmembers.create({
-        data: {
-            projectId: projectData.id,
-            userId: userId,
-            role: 'owner',
-        },
-    }),
-  ]);
-  return result[0];
+  return prisma.$transaction(async (tx) => {
+
+    const project = await tx.projects.create({
+      data: {
+        name: data.name,
+        description: data.description || null,
+        workspaceId,
+        createdBy: userId,
+      },
+    });
+
+    await tx.projectmembers.create({
+      data: {
+        projectId: project.id,
+        userId,
+        role: 'owner',
+        addedBy: userId,
+      },
+    });
+    return project;
+  });
 }
 async function getAllProjects(workspaceId,userId, skip, limit, search, status) {
   const where = {

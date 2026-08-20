@@ -3,7 +3,7 @@ const projectController = require('../controllers/project.controller');
 const { authMiddleware } = require('../middleware/auth.middleware');
 const validate = require('../middleware/validate.middleware');
 const { createProjectSchema, updateProjectSchema } = require('../validators/project.validator');
-projectrouter.post('/', authMiddleware, validate(createProjectSchema), projectController.createProject);
+projectrouter.post('/', authMiddleware,validate(createProjectSchema), projectController.createProject);
 projectrouter.get('/', authMiddleware, projectController.getAllProjects);
 projectrouter.get('/:projectId', authMiddleware, projectController.getProjectById);
 projectrouter.patch('/:projectId', authMiddleware, validate(updateProjectSchema), projectController.updateProject);

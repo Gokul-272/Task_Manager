@@ -1,5 +1,6 @@
 const projectMemberRepository = require('../repository/projectmember.repository');
 const projectRepository = require('../repository/project.repository');
+const workspaceRepository = require('../repository/workspace.repository');
 const AppError = require('../utils/AppError');
 const userRepository = require('../repository/user.repository');
 async function addProjectMember(workspaceId, projectId, email, userId) {
@@ -10,6 +11,14 @@ async function addProjectMember(workspaceId, projectId, email, userId) {
   const user = await userRepository.findByEmail(email);
   if (!user) {
     throw new AppError('User not found', 404);
+  }
+  const notworkspaceMember = await workspaceRepository.getWorkspaceById(workspaceId, user.id);
+  if (!notworkspaceMember) {
+    throw new AppError('User is not a member of the workspace', 400);
+  }
+  const existingMember = await projectMemberRepository.findmemberById(projectId, user.id);
+  if (existingMember) {
+    throw new AppError('User is already a member of this project', 400);
   }
   const projectMember = await projectMemberRepository.addProjectMember(projectId, user.id,userId);
   return projectMember;

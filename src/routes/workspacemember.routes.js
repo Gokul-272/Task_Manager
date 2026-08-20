@@ -4,7 +4,7 @@ const {authMiddleware}=require('../middleware/auth.middleware');
 const validate=require('../middleware/validate.middleware');
 const {updateWorkspaceMemberRoleSchema}=require('../validators/workspacemember.validator');
 workspacememberrouter.get('/',authMiddleware,workspaceMemberController.getWorkspaceMembers);
-workspacememberrouter.delete('/:memberId',authMiddleware,workspaceMemberController.removeWorkspaceMember);
 workspacememberrouter.delete('/exit',authMiddleware,workspaceMemberController.exitWorkspace);
+workspacememberrouter.delete('/:memberId',authMiddleware,workspaceMemberController.removeWorkspaceMember);
 workspacememberrouter.patch('/update-role',authMiddleware,validate(updateWorkspaceMemberRoleSchema),workspaceMemberController.updateWorkspaceMemberRole);
 module.exports=workspacememberrouter;

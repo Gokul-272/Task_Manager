@@ -1,4 +1,4 @@
-const BoardRouter = require('express').Router();
+const BoardRouter = require('express').Router({mergeParams:true});
 const boardController = require('../controllers/board.controller');
 const { authMiddleware } = require('../middleware/auth.middleware');
 const validate = require('../middleware/validate.middleware');

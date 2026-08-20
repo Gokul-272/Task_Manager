@@ -20,6 +20,7 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/auth',authRoutes);
 app.use('/api/users',userRoutes);

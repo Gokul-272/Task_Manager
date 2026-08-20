@@ -42,33 +42,53 @@ async function findmemberByIdAndUpdate(projectId, memberId, userId) {
             deletedAt: null,
         },
     });
-}
-async function removemember(projectId, memberId) {
-    return prisma.$transaction([
-    prisma.tasks.updateMany({
+}async function removemember(projectId, memberId) {
+  return prisma.$transaction(async (tx) => {
+
+    // Find all boards belonging to this project
+    const boards = await tx.boards.findMany({
+      where: {
+        projectId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    console.log("BOARDS:", boards);
+
+    const boardIds = boards.map(board => board.id);
+
+    // Unassign member's tasks
+    const taskResult = await tx.tasks.updateMany({
       where: {
         assignedTo: memberId,
-        board: {
-          projectId,
+        boardId: {
+          in: boardIds,
         },
-        deletedAt: null,
       },
       data: {
         assignedTo: null,
       },
-    }),
-    prisma.projectmembers.update({
-        where: {
-            projectId_userId: {
-             projectId,
-             userId: memberId,
-            },
-        },
-        data: {
-            deletedAt: new Date(),
-        },
-    })
-    ]);
+    });
+
+    // Soft-delete project membership
+    const memberResult = await tx.projectmembers.updateMany({
+      where: {
+        projectId,
+        userId: memberId,
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    return {
+      tasksUnassigned: taskResult.count,
+      memberRemoved: memberResult.count,
+    };
+  });
 }
 async function updateRole(projectId, memberId, role, userId) {
     const updatedMember = await prisma.$transaction([
@@ -95,9 +115,10 @@ async function updateRole(projectId, memberId, role, userId) {
         }),
         prisma.projectmembers.update({
             where: {
-                projectId_userId: {
+                projectId_userId_deletedAt: {
                     projectId,
-                    userId: memberId, 
+                    userId: memberId,
+                    deletedAt: null,
                 },
             },
             data: {
@@ -114,9 +135,10 @@ async function updateRole(projectId, memberId, role, userId) {
         }),
         prisma.projectmembers.update({
             where: {
-                 projectId_userId: {
+                 projectId_userId_deletedAt: {
                     projectId,
                     userId: userId,
+                    deletedAt: null,
                 },
             },
             data: {
